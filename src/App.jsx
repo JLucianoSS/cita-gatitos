@@ -1,121 +1,121 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { useState, useRef, useEffect } from 'react'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [opened, setOpened] = useState(false)
+  const [jump, setJump] = useState(false)
+  const [sunBoost, setSunBoost] = useState(false)
+  const audioRef = useRef(null)
+  const sceneRef = useRef(null)
+
+  const handleOpen = () => {
+    setOpened(true)
+    if (audioRef.current) {
+      audioRef.current.volume = 0.6
+      audioRef.current.play().catch(() => {})
+    }
+  }
+
+  const handlePhotoClick = () => {
+    setJump(true)
+    setSunBoost(true)
+    setTimeout(() => setJump(false), 700)
+    setTimeout(() => setSunBoost(false), 900)
+  }
+
+  // Efecto parallax con el mouse
+  useEffect(() => {
+    const handleMove = (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 2
+      const y = (e.clientY / window.innerHeight - 0.5) * 2
+      if (sceneRef.current) {
+        sceneRef.current.style.setProperty('--mx', x)
+        sceneRef.current.style.setProperty('--my', y)
+      }
+    }
+    window.addEventListener('mousemove', handleMove)
+    return () => window.removeEventListener('mousemove', handleMove)
+  }, [])
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="wrapper">
+      <audio ref={audioRef} src="/song.mp3" loop />
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+      {!opened && (
+        <div className="envelope-screen" onClick={handleOpen}>
+          <div className="envelope">💌</div>
+          <p className="tap-text">Toca para abrir, Adriana</p>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      )}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      {opened && (
+        <div className="scene" ref={sceneRef}>
+          {/* Cielo con degradado */}
+          <div className="sky"></div>
+
+          {/* Estrellas */}
+          <div className="stars layer" style={{ '--depth': 0.15 }}>
+            {Array.from({ length: 40 }).map((_, i) => (
+              <span
+                key={i}
+                className="star"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 60}%`,
+                  animationDelay: `${Math.random() * 4}s`,
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Sol neón */}
+          <div
+            className={`sun layer ${sunBoost ? 'sun-boost' : ''}`}
+            style={{ '--depth': 0.3 }}
+          ></div>
+
+          {/* Montañas lejanas */}
+          <div className="mountains-back layer" style={{ '--depth': 0.45 }}></div>
+          {/* Montañas cercanas */}
+          <div className="mountains-front layer" style={{ '--depth': 0.7 }}></div>
+
+          {/* Corazones flotantes */}
+          <div className="hearts">
+            {Array.from({ length: 14 }).map((_, i) => (
+              <span
+                key={i}
+                className="heart"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  animationDuration: `${7 + Math.random() * 6}s`,
+                  animationDelay: `${Math.random() * 5}s`,
+                  fontSize: `${14 + Math.random() * 16}px`,
+                }}
+              >
+                💗
+              </span>
+            ))}
+          </div>
+
+          {/* Contenido principal */}
+          <div className="content layer" style={{ '--depth': 0.9 }}>
+            <h1 className="neon-title">Para Adriana</h1>
+
+            <div className={`photo-frame ${jump ? 'jump' : ''}`} onClick={handlePhotoClick}>
+              <img src="/ella.jpeg" alt="Adriana" />
+            </div>
+
+            <p className="message">
+              Desde que te conocí, mis días tienen un color distinto.
+              Me gustaría pasar tiempo contigo, conocerte más y, si tú
+              quieres, que este sea solo el comienzo de algo que dure
+              para siempre.
+            </p>
+            <p className="signature">con cariño, siempre — Jorge Luciano</p>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
